@@ -2,26 +2,29 @@
 #include "lockqueue.h"
 #include <string>
 #include <unistd.h>
+#include <string.h>
 
 // 定义宏 LOG_INFO("xxx %d %s", 20, "xxxx")
 #define LOG_INFO(logmsgformat, ...) \
     do \
     {  \
         Logger &logger = Logger::GetInstance(); \
-        logger.SetLogLevel(INFO); \
         char c[1024] = {0}; \
+        char str[1048] = "[info] "; \
         snprintf(c, 1024, logmsgformat, ##__VA_ARGS__); \
-        logger.Log(c); \
+        strcat(str, c); \
+        logger.Log(str); \
     } while(0) \
 
 #define LOG_ERR(logmsgformat, ...) \
     do \
     {  \
         Logger &logger = Logger::GetInstance(); \
-        logger.SetLogLevel(ERROR); \
         char c[1024] = {0}; \
+        char str[1048] = "[error] "; \
         snprintf(c, 1024, logmsgformat, ##__VA_ARGS__); \
-        logger.Log(c); \
+        strcat(str, c); \
+        logger.Log(str); \
     } while(0) \
 
 // 定义日志级别
@@ -45,12 +48,10 @@ class Logger
 public:
     // 获取日志的单例
     static Logger& GetInstance();
-    // 设置日志级别 
-    void SetLogLevel(LogLevel level);
+
     // 写日志
     void Log(std::string msg);
 private:
-    int m_loglevel; // 记录日志级别, 这里设置成原子变量会不会好点，可能会有多个线程同时设置日志级别
     LockQueue<std::string>  m_lckQue; // 日志缓冲队列
 
     Logger();
